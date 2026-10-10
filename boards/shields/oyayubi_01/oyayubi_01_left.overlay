@@ -1,4 +1,6 @@
 #include "oyayubi_01.dtsi"
+#include <input/processors.dtsi>
+#include <dt-bindings/pinctrl/nrf-pinctrl.h>
 
 // 左手 (central) の GPIO アサイン
 // ピン番号の出典: docs/xiao_gpio_map_v2.md
@@ -20,4 +22,57 @@
         <&gpio0 4  GPIO_ACTIVE_HIGH>,  // Col4 / D4  / P0.04
         <&gpio0 5  GPIO_ACTIVE_HIGH>,  // Col5 / D5  / P0.05
         <&gpio1 11 GPIO_ACTIVE_HIGH>;  // Col6 / D6  / P1.11
+};
+
+// ── トラックパッド IQS7211E (I2C) ────────────────────────────────────────────
+// SCL = D12 / P0.19   SDA = D13 / P1.01   RDY = D17 / P1.03
+//
+// 標準 XIAO の D4(P0.04)/D5(P0.05) は左手マトリクスの Col4/Col5 に割り当て済みのため、
+// Plus 固有の追加パッド D12/D13 を I2C に使う。
+// i2c0 の pinctrl をボード定義から上書きして D12/D13 に付け替える。
+
+&pinctrl {
+    i2c0_default: i2c0_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 1, 1)>,   // P1.01 = D13
+                    <NRF_PSEL(TWIM_SCL, 0, 19)>;   // P0.19 = D12
+            bias-pull-up;
+        };
+    };
+    i2c0_sleep: i2c0_sleep {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 1, 1)>,   // P1.01 = D13
+                    <NRF_PSEL(TWIM_SCL, 0, 19)>;   // P0.19 = D12
+            low-power-enable;
+        };
+    };
+};
+
+&i2c0 {
+    status = "okay";
+    clock-frequency = <400000>;  // I2C fast mode (400 kHz)
+
+    iqs7211e: iqs7211e@56 {
+        compatible = "azoteq,iqs7211e";
+        reg = <0x56>;
+        // TODO: 要実機検証。D17/D19 物理パッド逆転の可能性あり。
+        // 無反応の場合は &gpio1 7 (P1.07 = D19) に変更する。
+        irq-gpios = <&gpio1 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;  // RDY / D17 / P1.03
+        single-tap = <0>;  // BTN_0 = 左クリック
+    };
+};
+
+/ {
+    trackpad_input_listener: trackpad_input_listener {
+        compatible = "zmk,input-listener";
+        status = "okay";
+        device = <&iqs7211e>;
+        input-processors = <&zip_xy_scaler 1 1>;
+        // スクロールレイヤーを追加する場合の雛形（使う layer 番号を layers に指定）:
+        // scroller {
+        //     layers = <1>;
+        //     input-processors = <&zip_xy_scaler 1 20>,
+        //                        <&zip_xy_to_scroll_mapper>;
+        // };
+    };
 };
