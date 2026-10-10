@@ -50,6 +50,9 @@
 
 &i2c0 {
     status = "okay";
+    pinctrl-0 = <&i2c0_default>;
+    pinctrl-1 = <&i2c0_sleep>;
+    pinctrl-names = "default", "sleep";
     clock-frequency = <400000>;  // I2C fast mode (400 kHz)
 
     iqs7211e: iqs7211e@56 {
