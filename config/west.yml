@@ -1,16 +1,23 @@
 manifest:
   remotes:
-    - name: zmkfirmware
-      url-base: https://github.com/zmkfirmware
-    - name: amgskobo
-      url-base: https://github.com/amgskobo
+    - name: cormoran
+      url-base: https://github.com/cormoran
+    # IQS7211E driver requires ZMK main (Zephyr 4.1). Re-enable when adding trackpad.
+    # - name: zmkfirmware
+    #   url-base: https://github.com/zmkfirmware
+    # - name: amgskobo
+    #   url-base: https://github.com/amgskobo
   projects:
     - name: zmk
-      remote: zmkfirmware
-      revision: main
+      remote: cormoran
+      revision: v0.3-branch+custom-studio-protocol+ble
       import: app/west.yml
-    - name: zmk-iqs7211e-driver
-      remote: amgskobo
+    - name: zmk-module-ble-management
+      remote: cormoran
       revision: main
+    # IQS7211E requires ZMK main (Zephyr 4.1). Re-enable when adding trackpad.
+    # - name: zmk-iqs7211e-driver
+    #   remote: amgskobo
+    #   revision: main
   self:
     path: config

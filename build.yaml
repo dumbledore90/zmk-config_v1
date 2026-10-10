@@ -10,12 +10,12 @@
 #   - エンコーダは overlay で定義済み。EC11 の Kconfig は Kconfig.defconfig で有効化
 ---
 include:
-  - board: xiao_ble//zmk
+  - board: seeeduino_xiao_ble
     shield: oyayubi_01_left
     snippet: studio-rpc-usb-uart
     cmake-args: -DCONFIG_ZMK_STUDIO=y
     artifact-name: oyayubi_01_left
 
-  - board: xiao_ble//zmk
+  - board: seeeduino_xiao_ble
     shield: oyayubi_01_right
     artifact-name: oyayubi_01_right
